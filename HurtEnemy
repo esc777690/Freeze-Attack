@@ -1,0 +1,75 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class HurtEnemy : MonoBehaviour {
+
+    public int damageToGive;
+    private int currentDamage;
+    public GameObject damageBurst;
+    public Transform hitPoint;
+    public GameObject damageNumber;
+
+    public bool frozen;
+    
+    private PlayerController thePC;
+    private Animator anim;
+
+    private PlayerStats thePS;
+
+    private float time = 5;
+    private float timeCounter;
+
+    public GameObject Name;
+
+    // Use this for initialization
+    void Start () {
+        thePS = FindObjectOfType<PlayerStats>();
+        thePC = FindObjectOfType<PlayerController>();
+        anim = GetComponent<Animator>();
+        frozen = false;
+    }
+	
+	// Update is called once per frame
+	void Update () {
+
+    }
+
+    public void OnTriggerEnter2D(Collider2D other)
+    {
+        if(other.gameObject.tag == "Enemy")
+        {
+
+            currentDamage = damageToGive + thePS.currentAttack;
+
+            if (thePC.sword1)
+            {
+                currentDamage = damageToGive + damageToGive * 1/2 + thePS.currentAttack;
+            }
+
+            if (thePC.wind1)
+            {
+                currentDamage = damageToGive + thePS.currentAttack/4;
+            }
+
+            if (thePC.earth1)
+            {
+                currentDamage = damageToGive + thePS.currentAttack/3;
+            }
+
+            Name = other.gameObject;
+
+             if (thePC.ice1)
+            {
+                frozen = true;
+                Name.gameObject.GetComponent<SlimeController>().OnFreeze();
+            }
+
+            other.gameObject.GetComponent<EnemyHealthManager>().HurtEnemy(currentDamage);
+            Instantiate(damageBurst, hitPoint.position, hitPoint.rotation);
+            var clone = (GameObject) Instantiate(damageNumber, hitPoint.position, Quaternion.Euler(Vector3.zero));
+            clone.GetComponent<FloatingNumbers>().damageNumber = currentDamage;
+
+        }
+    }
+}
